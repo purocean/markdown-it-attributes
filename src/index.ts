@@ -32,6 +32,15 @@ export type Info = {
 
 export type Attr = { key: string, value: string[] }
 
+export function findLast (items: Token[], fn: (item: Token) => boolean, startPos: number | undefined = undefined) {
+  for (let i = startPos === undefined ? items.length - 1 : startPos; i >= 0; i--) {
+    const item = items[i];
+    if (fn(item)) {
+      return item;
+    }
+  }
+}
+
 export function parseAttr (str: string): Attr | null {
   str = str.trim();
 
@@ -71,9 +80,9 @@ export function parseAttr (str: string): Attr | null {
     return { key, value: value ? [value] : [''] };
   }
 
-  // other foo => foo="foo"
+  // other foo => foo=""
   if (REG_ATTR_NAME.test(str)) {
-    return { key: str, value: [str] };
+    return { key: str, value: [''] };
   }
 
   return null;
@@ -165,17 +174,25 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
 
   let targetToken: Token | undefined;
 
-  const getParentTarget = () => {
+  const getParentTarget = (level: number | undefined = undefined) => {
     if (idx >= 2) {
       const prev = tokens[idx - 2];
       // apply to list item
-      if (prev.type === 'list_item_open') {
+      if (prev.type === 'list_item_open' || prev.type.endsWith('list_close')) {
         if (info.pos === InfoPos.WHOLE) {
-          return tokens[idx - 3]; // list
+          return findLast(
+            tokens,
+            t => t.nesting === 1 &&
+              t.type.endsWith('list_open') &&
+              (level === undefined || t.level === level),
+            idx
+          );
         } else {
           return prev; // list item
         }
-      } else if (prev.type === 'blockquote_open') {
+      }
+
+      if (prev.type === 'blockquote_open') {
         // support blockquote
         return prev; // blockquote
       }
@@ -185,11 +202,10 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
   };
 
   const getPrevTarget = () => {
-    const list = children.slice(0, childIdx).reverse();
-
-    const prevToken = list.find(x =>
-      (x.nesting === -1) ||
-      (x.nesting === 0 && x.type !== 'softbreak')
+    const prevToken = findLast(
+      children,
+      x => (x.nesting === -1) || (x.nesting === 0 && x.type !== 'softbreak'),
+      childIdx - 1
     );
 
     if (!prevToken) {
@@ -200,7 +216,11 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
       return prevToken;
     }
 
-    const prevOpenToken = list.find(x => x.nesting === 1 && x.tag === prevToken!.tag);
+    const prevOpenToken = findLast(
+      children,
+      x => x.nesting === 1 && x.tag === prevToken!.tag,
+      childIdx
+    );
 
     return prevOpenToken;
   };
@@ -210,11 +230,15 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
 
   if (isLast) { // apply to parent
     if (info.pos === InfoPos.WHOLE) {
-      const afterSoftbreak = children[childIdx - 1]?.type === 'softbreak';
-      if (afterSoftbreak) {
-        targetToken = getParentTarget();
+      if (children.length === 1) {
+        targetToken = getParentTarget(0);
       } else {
-        targetToken = getPrevTarget();
+        const afterSoftbreak = children[childIdx - 1]?.type === 'softbreak';
+        if (afterSoftbreak) {
+          targetToken = getParentTarget();
+        } else {
+          targetToken = getPrevTarget();
+        }
       }
     } else if (info.pos === InfoPos.LEFT) {
       targetToken = getPrevTarget();
@@ -248,8 +272,18 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
 
   if (info.pos === InfoPos.WHOLE) {
     token.children?.splice(childIdx, 1);
-    if (token.children![childIdx - 1].type === 'softbreak') {
+    if (token.children![childIdx - 1]?.type === 'softbreak') {
       token.children?.splice(childIdx - 1, 1);
+    }
+
+    if (!token.children!.length) {
+      const prevToken = tokens[idx - 1];
+      const nextToken = tokens[idx + 1];
+      if (prevToken && nextToken && prevToken.type === 'paragraph_open' && nextToken.type === 'paragraph_close') {
+        token.hidden = true;
+        prevToken.hidden = true;
+        nextToken.hidden = true;
+      }
     }
   }
 

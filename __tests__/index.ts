@@ -1,6 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+// some test case from https://github.com/arve0/markdown-it-attrs/blob/master/test.js
+
 import * as lib from '@/index';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Markdown = require('markdown-it');
+const implicitFigures = require('markdown-it-implicit-figures');
+const katex = require('markdown-it-katex');
 
 const md = Markdown({});
 md.use(lib.default, {});
@@ -30,8 +34,8 @@ test('parseAttr', () => {
   expect(lib.parseAttr('.foo..bar')).toEqual({ key: 'class', value: ['foo', 'bar'] });
   expect(lib.parseAttr('#')).toEqual(null);
   expect(lib.parseAttr('#foo')).toEqual({ key: 'id', value: ['foo'] });
-  expect(lib.parseAttr('foo')).toEqual({ key: 'foo', value: ['foo'] });
-  expect(lib.parseAttr('a0')).toEqual({ key: 'a0', value: ['a0'] });
+  expect(lib.parseAttr('foo')).toEqual({ key: 'foo', value: [''] });
+  expect(lib.parseAttr('a0')).toEqual({ key: 'a0', value: [''] });
   expect(lib.parseAttr('0')).toEqual(null);
   expect(lib.parseAttr('a=b')).toEqual({ key: 'a', value: ['b'] });
   expect(lib.parseAttr('a=\'b\'')).toEqual({ key: 'a', value: ['b'] });
@@ -53,7 +57,7 @@ test('getAttrs', () => {
   expect(lib.getAttrs('.foo..bar #123 w 0 - 0a=c  a=b c="d" e=\'f\' g="h i"')).toEqual([
     { key: 'class', value: ['foo', 'bar'] },
     { key: 'id', value: ['123'] },
-    { key: 'w', value: ['w'] },
+    { key: 'w', value: [''] },
     { key: 'a', value: ['b'] },
     { key: 'c', value: ['d'] },
     { key: 'e', value: ['f'] },
@@ -200,11 +204,11 @@ test('should not create empty attributes', () => {
   expect(md.render(src)).toEqual(expected);
 });
 
-// test('should add attributes to ul when below last bullet point', () => {
-//   const src = '- item1\n- item2\n{.red}';
-//   const expected = '<ul class="red">\n<li>item1</li>\n<li>item2</li>\n</ul>\n';
-//   expect(md.render(src)).toEqual(expected);
-// });
+test('should add attributes to ul when below last bullet point', () => {
+  const src = '- item1\n- item2\n{.red}';
+  const expected = '<ul class="red">\n<li>item1</li>\n<li>item2</li>\n</ul>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
 test('should add classes for both last list item and ul', () => {
   const src = '- item{.red}\n{.blue}';
@@ -286,21 +290,21 @@ test('should support blockquotes', () => {
 //       expect(md.render(src)).toEqual(expected);
 //     });
 
-//     test('should support nested lists', () => {
-//       src =  '- item\n';
-//       src += '  - nested\n';
-//       src += '  {.red}\n';
-//       src += '\n';
-//       src += '{.blue}\n';
-//       expected = '<ul class="blue">\n';
-//       expected += '<li>item\n';
-//       expected += '<ul class="red">\n';
-//       expected += '<li>nested</li>\n';
-//       expected += '</ul>\n';
-//       expected += '</li>\n';
-//       expected += '</ul>\n';
-//       expect(md.render(src)).toEqual(expected);
-//     });
+test('should support nested lists', () => {
+  let src = '- item\n';
+  src += '  - nested\n';
+  src += '  {.red}\n';
+  src += '\n';
+  src += '{.blue}\n';
+  let expected = '<ul class="blue">\n';
+  expected += '<li>item\n';
+  expected += '<ul class="red">\n';
+  expected += '<li>nested</li>\n';
+  expected += '</ul>\n';
+  expected += '</li>\n';
+  expected += '</ul>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
 test('should support images', () => {
   const src = '![alt](img.png){.a}';
@@ -308,19 +312,19 @@ test('should support images', () => {
   expect(md.render(src)).toEqual(expected);
 });
 
-//     test('should work with plugin implicit-figures', () => {
-//       md = md.use(implicitFigures);
-//       src =  '![alt](img.png){.a}';
-//       expected = '<figure><img src="img.png" alt="alt" class="a"></figure>\n';
-//       expect(md.render(src)).toEqual(expected);
-//     });
+test('should work with plugin implicit-figures', () => {
+  const _md = Markdown({}).use(lib.default).use(implicitFigures);
+  const src = '![alt](img.png){.a}';
+  const expected = '<figure><img src="img.png" alt="alt" class="a"></figure>\n';
+  expect(_md.render(src)).toEqual(expected);
+});
 
-//     test('should work with plugin katex', () => {
-//       md = md.use(katex);
-//       const mdWithOnlyKatex = Md().use(katex);
-//       const src = '$\\sqrt{a}$';
-//       const assert.equal(md.render(src), mdWithOnlyKatex.render(src));
-//     });
+test('should work with plugin katex', () => {
+  const _md = Markdown({}).use(lib.default).use(katex);
+  const mdWithOnlyKatex = Markdown({}).use(katex);
+  const src = '$\\sqrt{a}$';
+  expect(_md.render(src)).toEqual(mdWithOnlyKatex.render(src));
+});
 
 test('should not apply inside `code{.red}`', () => {
   const src = 'paragraph `code{.red}`';
@@ -334,11 +338,11 @@ test('should not apply inside item lists with trailing `code{.red}`', () => {
   expect(md.render(src)).toEqual(expected);
 });
 
-// test('should not apply inside item lists with trailing non-text, eg *{.red}*', () => {
-//   const src = '- item with trailing *{.red}*';
-//   const expected = '<ul>\n<li>item with trailing <em>{.red}</em></li>\n</ul>\n';
-//   expect(md.render(src)).toEqual(expected);
-// });
+test('should not apply inside item lists with trailing non-text, eg *{.red}*', () => {
+  const src = '- item with trailing *{.red}*';
+  const expected = '<ul>\n<li>item with trailing <em>{.red}</em></li>\n</ul>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
 test('should work with multiple inline code blocks in same paragraph', () => {
   const src = 'bla `click()`{.c} blah `release()`{.cpp}';
@@ -346,11 +350,11 @@ test('should work with multiple inline code blocks in same paragraph', () => {
   expect(md.render(src)).toEqual(expected);
 });
 
-// test('should support {} curlies with length == 3', () => {
-//   const src = 'text {1}';
-//   const expected = '<p 1="">text</p>\n';
-//   expect(md.render(src)).toEqual(expected);
-// });
+test('should support {} curlies with length == 3', () => {
+  const src = 'text {a}';
+  const expected = '<p a="">text</p>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
 test('should do nothing with empty classname {.}', () => {
   const src = 'text {.}';
