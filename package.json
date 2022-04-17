@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "lint": "yarn run eslint '{src,__tests__}/**/*.{js,ts,tsx}'",
-    "build": "rm -r lib/* types/*; yarn run rollup -c && yarn run doc",
+    "build": "rm -r lib/* types/*; yarn run rollup -c",
     "test": "yarn run jest --coverage --coverage-reporters=text --silent",
     "check": "yarn run lint && yarn run test"
   },
