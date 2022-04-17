@@ -23,9 +23,9 @@
     "test": "yarn run jest --coverage --coverage-reporters=text --silent",
     "check": "yarn run lint && yarn run test"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^26.0.23",
+    "@types/markdown-it": "^12.2.3",
     "@typescript-eslint/eslint-plugin": "^4.23.0",
     "@typescript-eslint/parser": "^4.23.0",
     "eslint": "^7.26.0",
@@ -42,5 +42,8 @@
     "ts-jest": "^26.5.6",
     "tslib": "^2.2.0",
     "typescript": "^4.2.4"
+  },
+  "peerDependencies": {
+    "markdown-it": "^12.3.2"
   }
 }
