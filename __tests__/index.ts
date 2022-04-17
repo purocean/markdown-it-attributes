@@ -257,11 +257,11 @@ test('should support code blocks with language defined', () => {
   expect(md.render(src)).toEqual(expected);
 });
 
-// test('should support blockquotes', () => {
-//   const src = '> quote\n{.c}';
-//   const expected = '<blockquote class="c">\n<p>quote</p>\n</blockquote>\n';
-//   expect(md.render(src)).toEqual(expected);
-// });
+test('should support blockquotes', () => {
+  const src = '> quote\n{.c}';
+  const expected = '<blockquote class="c">\n<p>quote</p>\n</blockquote>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
 //     test('should support tables', () => {
 //       const src = '| h1 | h2 |\n';

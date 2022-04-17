@@ -166,7 +166,7 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
   let targetToken: Token | undefined;
 
   const getParentTarget = () => {
-    if (idx > 2) {
+    if (idx >= 2) {
       const prev = tokens[idx - 2];
       // apply to list item
       if (prev.type === 'list_item_open') {
@@ -175,6 +175,9 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
         } else {
           return prev; // list item
         }
+      } else if (prev.type === 'blockquote_open') {
+        // support blockquote
+        return prev; // blockquote
       }
     }
 
