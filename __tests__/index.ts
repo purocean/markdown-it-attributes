@@ -222,13 +222,13 @@ test('should add class ul after a "softbreak"', () => {
   expect(md.render(src)).toEqual(expected);
 });
 
-// test('should ignore non-text "attr-like" text after a "softbreak"', () => {
-//   const src = '- item\n*{.blue}*';
-//   let expected = '<ul>\n';
-//   expected += '<li>item\n<em>{.blue}</em></li>\n';
-//   expected += '</ul>\n';
-//   expect(md.render(src)).toEqual(expected);
-// });
+test('should ignore non-text "attr-like" text after a "softbreak"', () => {
+  const src = '- item\n*{.blue}*';
+  let expected = '<ul>\n';
+  expected += '<li>item\n<em>{.blue}</em></li>\n';
+  expected += '</ul>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
 test('should work with ordered lists', () => {
   const src = '1. item\n{.blue}';
@@ -245,17 +245,17 @@ test('should work with typography enabled', () => {
   expect(res).toEqual(expected);
 });
 
-// test('should support code blocks', () => {
-//   const src = '```{.c a=1 #ii}\nfor i in range(10):\n```';
-//   const expected = '<pre><code class="c" a="1" id="ii">for i in range(10):\n</code></pre>\n';
-//   expect(md.render(src)).toEqual(expected);
-// });
+test('should support code blocks', () => {
+  const src = '```{.c a=1 #ii}\nfor i in range(10):\n```';
+  const expected = '<pre><code class="c" a="1" id="ii">for i in range(10):\n</code></pre>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
-//     test('should support code blocks with language defined', () => {
-//       const src = '```python {.c a=1 #ii}\nfor i in range(10):\n```';
-//       const expected = '<pre><code class="c language-python" a="1" id="ii">for i in range(10):\n</code></pre>\n';
-//       expect(md.render(src)).toEqual(expected);
-//     });
+test('should support code blocks with language defined', () => {
+  const src = '```python {.c a=1 #ii}\nfor i in range(10):\n```';
+  const expected = '<pre><code class="c language-python" a="1" id="ii">for i in range(10):\n</code></pre>\n';
+  expect(md.render(src)).toEqual(expected);
+});
 
 // test('should support blockquotes', () => {
 //   const src = '> quote\n{.c}';

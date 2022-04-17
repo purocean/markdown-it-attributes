@@ -147,6 +147,17 @@ export function parseToken (token: { content?: string }): Info | null {
   return null;
 }
 
+export function applyAttrs (token: Token, attrs: Attr[]) {
+  attrs.forEach(attr => {
+    const { key, value } = attr;
+    if (key === 'class') {
+      token.attrJoin('class', value.join(' '));
+    } else {
+      token.attrPush([key, value.join('')]);
+    }
+  });
+}
+
 export function transformTokens (tokens: Token[], idx: number, childIdx: number, info: Info) {
   const token = tokens[idx];
   const child = token.children![childIdx];
@@ -213,7 +224,12 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
       targetToken = getParentTarget();
     }
   } else {
-    targetToken = getPrevTarget();
+    // ignore like *{.test}*
+    if (info.pos === InfoPos.WHOLE && children[childIdx - 1]?.nesting === 1) {
+      targetToken = undefined;
+    } else {
+      targetToken = getPrevTarget();
+    }
   }
 
   if (!targetToken) {
@@ -234,14 +250,7 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
     }
   }
 
-  attrs.forEach(attr => {
-    const { key, value } = attr;
-    if (key === 'class') {
-      targetToken!.attrJoin('class', value.join(' '));
-    } else {
-      targetToken!.attrPush([key, value.join('')]);
-    }
-  });
+  applyAttrs(targetToken, attrs);
 }
 
 export function processToken (tokens: Token[], idx: number) {
@@ -264,10 +273,16 @@ export function processToken (tokens: Token[], idx: number) {
 
       const info = parseToken(child);
       if (info) {
-        token.content = info.text;
         transformTokens(tokens, idx, childIdx, info);
       }
     });
+  } else if (token.type === 'fence' && token.info) {
+    const info = parseToken({ content: token.info });
+    if (info) {
+      const attrs = getAttrs(info.exp);
+      token.info = info.text;
+      applyAttrs(token, attrs);
+    }
   }
 }
 
