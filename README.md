@@ -2,12 +2,22 @@
 
 Add classes, identifiers and attributes to your markdown with {} curly brackets, similar to pandoc's header attributes
 
-An alternate of [markdown-it-attr](https://github.com/arve0/markdown-it-attrs), write by typescript, 3x faster.
+An alternate of [markdown-it-attr](https://github.com/arve0/markdown-it-attrs), write by typescript, 67x faster!
 
 Note: Not support css-module and `hr` tag.
 
+**Before: Markdown-it-attrs**
+
+<img width="775" alt="before" src="https://user-images.githubusercontent.com/7115690/163722498-9b1be126-a82b-4d4c-995c-94f8431b3744.png">
+
+**After: markdown-it-attributes**
+
+<img width="775" alt="after" src="https://user-images.githubusercontent.com/7115690/163722482-eda06281-af6c-4158-9419-d93b3505cb90.png">
+
+**Render Time: 3x**
+
 ```
-node  benchmark.js
+node benchmark.js
 
 markdown-it-attrs test1: 1897ms
 markdown-it-attributes test1: 532ms
