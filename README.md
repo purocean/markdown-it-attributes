@@ -27,7 +27,7 @@ result equal: true
 ## Install
 
 ```sh
-npm install --save markdown-it-attrs
+npm install --save markdown-it-attributes
 ```
 
 ## Usage
