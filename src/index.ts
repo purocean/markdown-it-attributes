@@ -177,14 +177,30 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
   const getParentTarget = (level: number | undefined = undefined) => {
     if (idx >= 2) {
       const prev = tokens[idx - 2];
+
+      // apply to table
+      if (prev.type === 'table_close') {
+        if (info.pos === InfoPos.WHOLE) {
+          return findLast(
+            tokens,
+            t => t.nesting === 1 &&
+              (level === undefined || t.level === level) &&
+              t.type.endsWith('table_open'),
+            idx
+          );
+        } else {
+          return undefined; // do nothing
+        }
+      }
+
       // apply to list item
       if (prev.type === 'list_item_open' || prev.type.endsWith('list_close')) {
         if (info.pos === InfoPos.WHOLE) {
           return findLast(
             tokens,
             t => t.nesting === 1 &&
-              t.type.endsWith('list_open') &&
-              (level === undefined || t.level === level),
+              (level === undefined || t.level === level) &&
+              t.type.endsWith('list_open'),
             idx
           );
         } else {
@@ -192,8 +208,8 @@ export function transformTokens (tokens: Token[], idx: number, childIdx: number,
         }
       }
 
+      // apply to blockquote
       if (prev.type === 'blockquote_open') {
-        // support blockquote
         return prev; // blockquote
       }
     }
