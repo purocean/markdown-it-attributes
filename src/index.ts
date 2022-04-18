@@ -160,7 +160,7 @@ export function transformTokens (opts: Options, tokens: Token[], idx: number, ch
       const prev = tokens[idx - 2];
 
       // apply to table
-      if (prev.type === 'table_close') {
+      if (info.pos === InfoPos.WHOLE && children.length === 1 && prev.type === 'table_close') {
         if (info.pos === InfoPos.WHOLE) {
           return findLast(
             tokens,
@@ -175,7 +175,13 @@ export function transformTokens (opts: Options, tokens: Token[], idx: number, ch
       }
 
       // apply to list
-      if (info.pos === InfoPos.WHOLE && (prev.type === 'list_item_open' || prev.type.endsWith('list_close'))) {
+      if (
+        info.pos === InfoPos.WHOLE &&
+        (
+          prev.type === 'list_item_open' ||
+          (children.length === 1 && prev.type.endsWith('list_close'))
+        )
+      ) {
         return findLast(
           tokens,
           t => t.nesting === 1 &&

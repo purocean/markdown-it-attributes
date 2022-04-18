@@ -6,6 +6,10 @@ const MarkdownItAttributes = require('./lib/bundle.cjs').default;
 const mdMarkdownItAttrs = Markdown({}).use(MarkdownItAttrs);
 const mdMarkdownItAttributes = Markdown({}).use(MarkdownItAttributes);
 
+// const src = '- abc\n- 123\n\nabc\n{.red}';
+// console.log(mdMarkdownItAttrs.render(src));
+// process.exit();
+
 const test1 = `
 some text {with=attrs}
 
@@ -126,6 +130,30 @@ text {.someclass #someid attr=notAllowed}
 text {.someclass #someid attr=allowed}
 
 some text{link=/some/page/in/app/id=1}
+
+| h1 | h2 |
+| -- | -- |
+| c1 | c1 |
+
+test {.c}
+
+| h1 | h2 |
+| -- | -- |
+| c1 | c1 |
+
+test
+{.c}
+
+- abc
+- 123
+
+ac
+{.red}
+
+- abc
+- 123
+
+ac{.red}
 
 `.repeat(2000);
 

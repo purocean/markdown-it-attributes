@@ -418,6 +418,56 @@ describe.each([
     expect(md.render(rd(src))).toEqual(rd(expected));
   });
 
+  test('table and paragraph', () => {
+    const src = '| h1 | h2 |\n| -- | -- |\n | c1 | c1 |\n\ntest {.c}';
+    let expected = '<table>\n';
+    expected += '<thead>\n';
+    expected += '<tr>\n';
+    expected += '<th>h1</th>\n';
+    expected += '<th>h2</th>\n';
+    expected += '</tr>\n';
+    expected += '</thead>\n';
+    expected += '<tbody>\n';
+    expected += '<tr>\n';
+    expected += '<td>c1</td>\n';
+    expected += '<td>c1</td>\n';
+    expected += '</tr>\n';
+    expected += '</tbody>\n';
+    expected += '</table>\n';
+    expected += '<p class="c">test</p>\n';
+    expect(md.render(rd(src))).toEqual(rd(expected));
+  });
+
+  test('table and paragraph 2', () => {
+    const src = '| h1 | h2 |\n| -- | -- |\n | c1 | c1 |\n\ntest {.c}';
+    let expected = '<table>\n';
+    expected += '<thead>\n';
+    expected += '<tr>\n';
+    expected += '<th>h1</th>\n';
+    expected += '<th>h2</th>\n';
+    expected += '</tr>\n';
+    expected += '</thead>\n';
+    expected += '<tbody>\n';
+    expected += '<tr>\n';
+    expected += '<td>c1</td>\n';
+    expected += '<td>c1</td>\n';
+    expected += '</tr>\n';
+    expected += '</tbody>\n';
+    expected += '</table>\n';
+    expected += '<p class="c">test</p>\n';
+    expect(md.render(rd(src))).toEqual(rd(expected));
+  });
+
+  test('ul and paragraph', () => {
+    const src = '- abc\n- 123\n\nabc\n{.red}';
+    let expected = '<ul>\n';
+    expected += '<li>abc</li>\n';
+    expected += '<li>123</li>\n';
+    expected += '</ul>\n';
+    expected += '<p class="red">abc</p>\n';
+    expect(md.render(rd(src))).toEqual(rd(expected));
+  });
+
   // test('should support horizontal rules ---{#id}', () => {
   //   const src = '---{#id}';
   //   const expected = '<hr id="id">\n';
