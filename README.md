@@ -4,7 +4,7 @@ Add classes, identifiers and attributes to your markdown with {} curly brackets,
 
 An alternate of [markdown-it-attr](https://github.com/arve0/markdown-it-attrs), write by TypeScript, 67x faster!
 
-Note: Not support css-module and `hr` tag.
+Note: *Not support css-module and `hr` tag*.
 
 Test of 100000 lines, 350000 characters large file.
 
