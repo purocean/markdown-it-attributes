@@ -6,6 +6,8 @@ An alternate of [markdown-it-attr](https://github.com/arve0/markdown-it-attrs), 
 
 Note: Not support css-module and `hr` tag.
 
+Test of 100000 lines, 350000 characters large file.
+
 **Before: Markdown-it-attrs**
 
 <img width="775" alt="before" src="https://user-images.githubusercontent.com/7115690/163722498-9b1be126-a82b-4d4c-995c-94f8431b3744.png">
