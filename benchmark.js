@@ -3,6 +3,7 @@ const Markdown = require('markdown-it');
 const MarkdownItAttrs = require('markdown-it-attrs');
 const MarkdownItAttributes = require('./lib/bundle.cjs').default;
 
+const md = Markdown({});
 const mdMarkdownItAttrs = Markdown({}).use(MarkdownItAttrs);
 const mdMarkdownItAttributes = Markdown({}).use(MarkdownItAttributes);
 
@@ -158,6 +159,11 @@ ac{.red}
 `.repeat(2000);
 
 let time1, time2;
+
+time1 = process.hrtime.bigint();
+md.render(test1);
+time2 = process.hrtime.bigint();
+console.log(`no plugin: ${(time2 - time1) / 1000000n}ms`);
 
 time1 = process.hrtime.bigint();
 const res1 = mdMarkdownItAttrs.render(test1);

@@ -6,7 +6,7 @@ An alternate of [markdown-it-attr](https://github.com/arve0/markdown-it-attrs), 
 
 Note: *Not support css-module and `hr` tag*.
 
-Test of 100000 lines, 350000 characters large file.
+Test of 100000 lines, 350000 characters simple and large file. 67x faster!
 
 **Before: markdown-it-attrs**
 
@@ -16,13 +16,16 @@ Test of 100000 lines, 350000 characters large file.
 
 <img width="775" alt="after" src="https://user-images.githubusercontent.com/7115690/163722482-eda06281-af6c-4158-9419-d93b3505cb90.png">
 
-**Render Time: 3x**
+**Benchmark**
+
+more complex content. 32x faster!
 
 ```
 node benchmark.js
 
-markdown-it-attrs test1: 1897ms
-markdown-it-attributes test1: 532ms
+no plugin: 483ms
+markdown-it-attrs test1: 2358ms
+markdown-it-attributes test1: 542ms
 result equal: true
 ```
 
