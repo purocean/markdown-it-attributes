@@ -6,6 +6,8 @@ An alternate of [markdown-it-attr](https://github.com/arve0/markdown-it-attrs), 
 
 Note: *Not support css-module and `hr` tag*.
 
+Article: [Yank Note 系列 07 - 性能暴增 132 倍的秘密——重写](https://blog-purocean.vercel.app/yank-note-07/)
+
 **Benchmark**
 
 ```
