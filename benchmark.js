@@ -7,9 +7,23 @@ const md = Markdown({});
 const mdMarkdownItAttrs = Markdown({}).use(MarkdownItAttrs);
 const mdMarkdownItAttributes = Markdown({}).use(MarkdownItAttributes);
 
+function average (fn, times) {
+  // warm-up
+  fn();
+  fn();
+
+  const start = process.hrtime.bigint();
+  for (let i = 0; i < times; i++) {
+    fn();
+  }
+  return Number((process.hrtime.bigint() - start) / 1000000n / BigInt(times));
+}
+
 // const src = '- abc\n- 123\n\nabc\n{.red}';
 // console.log(mdMarkdownItAttrs.render(src));
 // process.exit();
+
+const test0 = 'TEST\n\n'.repeat(50000);
 
 const test1 = `
 some text {with=attrs}
@@ -158,21 +172,37 @@ ac{.red}
 
 `.repeat(2000);
 
-let time1, time2;
+let avg1, avg2, avg3;
 
-time1 = process.hrtime.bigint();
-md.render(test1);
-time2 = process.hrtime.bigint();
-console.log(`no plugin: ${(time2 - time1) / 1000000n}ms`);
+console.log(`simple content ---------- ${test0.split('\n').length} lines, ${test0.length} characters`);
 
-time1 = process.hrtime.bigint();
+avg1 = average(() => md.render(test0), 5);
+console.log('no plugin:', avg1 + 'ms');
+
+avg2 = average(() => mdMarkdownItAttrs.render(test0), 5);
+console.log('markdown-it-attrs:', avg2 + 'ms');
+
+avg3 = average(() => mdMarkdownItAttributes.render(test0), 5);
+console.log('markdown-it-attributes:', avg3 + 'ms');
+
+console.log('inc:', (avg2 - avg1) / (avg3 - avg1) + 'x');
+
+console.log(`complex content ---------- ${test1.split('\n').length} lines, ${test1.length} characters`);
+
+avg1 = average(() => md.render(test1), 5);
+console.log('no plugin:', avg1 + 'ms');
+
+avg2 = average(() => mdMarkdownItAttrs.render(test1), 5);
+console.log('markdown-it-attrs:', avg2 + 'ms');
+
+avg3 = average(() => mdMarkdownItAttributes.render(test1), 5);
+console.log('markdown-it-attributes:', avg3 + 'ms');
+
+console.log('inc:', (avg2 - avg1) / (avg3 - avg1) + 'x');
+
+console.log('compare result ----------');
+
 const res1 = mdMarkdownItAttrs.render(test1);
-time2 = process.hrtime.bigint();
-console.log(`markdown-it-attrs test1: ${(time2 - time1) / 1000000n}ms`);
-
-time1 = process.hrtime.bigint();
 const res2 = mdMarkdownItAttributes.render(test1);
-time2 = process.hrtime.bigint();
-console.log(`markdown-it-attributes test1: ${(time2 - time1) / 1000000n}ms`);
 
 console.log('result equal:', res1.replace(/\n/g, '') === res2.replace(/\n/g, ''));
