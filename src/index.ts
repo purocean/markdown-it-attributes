@@ -98,31 +98,33 @@ export function parseInfo (opts: Options, content?: string | null): Info | null 
     return null;
   }
 
-  const posStart = content.lastIndexOf(opts.leftDelimiter) === 0;
-  const posEnd = content.indexOf(opts.rightDelimiter) === content.length - opts.rightDelimiter.length;
+  // fail fast
+  if (!content.startsWith(opts.leftDelimiter) && !content.endsWith(opts.rightDelimiter)) {
+    return null;
+  }
 
-  if (posEnd) {
-    const idx = content.lastIndexOf(opts.leftDelimiter);
-    if (idx > -1) {
-      const exp = content.substring(idx + opts.leftDelimiter.length, content.length - opts.leftDelimiter.length);
-      const text = content.substring(0, idx).trimEnd();
-      if (!exp) {
-        return null;
-      }
+  const startIdx = content.lastIndexOf(opts.leftDelimiter);
+  const endIdx = content.indexOf(opts.rightDelimiter);
 
-      return { pos: posStart ? InfoPos.WHOLE : InfoPos.RIGHT, exp, text };
+  const posStart = startIdx === 0;
+  const posEnd = endIdx === content.length - opts.rightDelimiter.length;
+
+  if (posEnd && startIdx > -1) {
+    const exp = content.substring(startIdx + opts.leftDelimiter.length, content.length - opts.leftDelimiter.length);
+    const text = content.substring(0, startIdx).trimEnd();
+    if (!exp) {
+      return null;
     }
-  } else if (posStart) {
-    const idx = content.indexOf(opts.rightDelimiter);
-    if (idx > -1) {
-      const exp = content.substring(opts.leftDelimiter.length, idx);
-      const text = content.substring(idx + opts.rightDelimiter.length); // .trimStart();
-      if (!exp) {
-        return null;
-      }
 
-      return { pos: posEnd ? InfoPos.WHOLE : InfoPos.LEFT, exp, text };
+    return { pos: posStart ? InfoPos.WHOLE : InfoPos.RIGHT, exp, text };
+  } else if (posStart && endIdx > -1) {
+    const exp = content.substring(opts.leftDelimiter.length, endIdx);
+    const text = content.substring(endIdx + opts.rightDelimiter.length); // .trimStart();
+    if (!exp) {
+      return null;
     }
+
+    return { pos: posEnd ? InfoPos.WHOLE : InfoPos.LEFT, exp, text };
   }
 
   return null;
