@@ -37,6 +37,10 @@ describe.each([
     expect(lib.parseInfo(opts, rd('{}a'))).toEqual(null);
     expect(lib.parseInfo(opts, rd('b{}'))).toEqual(null);
     expect(lib.parseInfo(opts, rd('abc'))).toEqual(null);
+    expect(lib.parseInfo(opts, rd('}fff{'))).toEqual(null);
+    expect(lib.parseInfo(opts, rd('{\\{}'))).toEqual({ pos: 0, exp: rd('{'), text: '' });
+    expect(lib.parseInfo(opts, rd('abc \\{foo}'))).toEqual(null);
+    expect(lib.parseInfo(opts, rd('{foo="\\{ab \\{ \\}c\\}"}'))).toEqual({ pos: 0, exp: rd('foo="{ab { }c}"'), text: '' });
   });
 
   test('parseAttr', () => {

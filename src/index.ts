@@ -33,6 +33,10 @@ export type Info = {
 
 export type Attr = { key: string, value: string[] }
 
+export function escapeRE (exp: string) {
+  return exp.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
 export function findLast (items: Token[], fn: (item: Token) => boolean, startPos: number | undefined = undefined) {
   for (let i = startPos === undefined ? items.length - 1 : startPos; i >= 0; i--) {
     const item = items[i];
@@ -93,6 +97,43 @@ export function getAttrs (exp: string) {
   return list.map(parseAttr).filter(Boolean) as Attr[];
 }
 
+export function replaceExp (exp: string, opts: Options) {
+  const reg = `\\\\(${escapeRE(opts.leftDelimiter)}|${escapeRE(opts.rightDelimiter)})`;
+  return exp.replace(new RegExp(reg, 'g'), '$1');
+}
+
+export function getIndices (opts: Options, content: string): [number, number, boolean] | null {
+  const len = content.length;
+  const delimiterLength = opts.leftDelimiter.length;
+  let startIdx = -1;
+  let endIdx = -1;
+  let str = '';
+  let hasEscape = false;
+
+  for (let i = 0; i < len; i++) {
+    if (content.charCodeAt(i) === 0x5c) { // \
+      i++;
+      hasEscape = true;
+      continue;
+    }
+
+    str = content.slice(i, i + delimiterLength);
+    if (str === opts.leftDelimiter) {
+      startIdx = i;
+    }
+
+    if (endIdx === -1 && str === opts.rightDelimiter) {
+      endIdx = i;
+    }
+  }
+
+  if (startIdx >= endIdx) {
+    return null;
+  }
+
+  return [startIdx, endIdx, hasEscape];
+}
+
 export function parseInfo (opts: Options, content?: string | null): Info | null {
   if (!content) {
     return null;
@@ -103,31 +144,46 @@ export function parseInfo (opts: Options, content?: string | null): Info | null 
     return null;
   }
 
-  const startIdx = content.lastIndexOf(opts.leftDelimiter);
-  const endIdx = content.indexOf(opts.rightDelimiter);
+  const indices = getIndices(opts, content);
+
+  if (!indices) {
+    return null;
+  }
+
+  const [startIdx, endIdx, hasEscape] = indices;
 
   const posStart = startIdx === 0;
   const posEnd = endIdx === content.length - opts.rightDelimiter.length;
 
+  let exp: string;
+  let text: string;
+  let pos: InfoPos;
+
   if (posEnd && startIdx > -1) {
-    const exp = content.substring(startIdx + opts.leftDelimiter.length, content.length - opts.leftDelimiter.length);
-    const text = content.substring(0, startIdx).trimEnd();
+    exp = content.substring(startIdx + opts.leftDelimiter.length, content.length - opts.leftDelimiter.length);
+    text = content.substring(0, startIdx).trimEnd();
     if (!exp) {
       return null;
     }
 
-    return { pos: posStart ? InfoPos.WHOLE : InfoPos.RIGHT, exp, text };
+    pos = posStart ? InfoPos.WHOLE : InfoPos.RIGHT;
   } else if (posStart && endIdx > -1) {
-    const exp = content.substring(opts.leftDelimiter.length, endIdx);
-    const text = content.substring(endIdx + opts.rightDelimiter.length); // .trimStart();
+    exp = content.substring(opts.leftDelimiter.length, endIdx);
+    text = content.substring(endIdx + opts.rightDelimiter.length); // .trimStart();
     if (!exp) {
       return null;
     }
 
-    return { pos: posEnd ? InfoPos.WHOLE : InfoPos.LEFT, exp, text };
+    pos = posEnd ? InfoPos.WHOLE : InfoPos.LEFT;
+  } else {
+    return null;
   }
 
-  return null;
+  return {
+    pos,
+    exp: hasEscape ? replaceExp(exp, opts) : exp,
+    text
+  };
 }
 
 export function applyAttrs (opts: Options, token: Token, attrs: Attr[]) {
@@ -331,6 +387,11 @@ export function processToken (opts: Options, tokens: Token[], idx: number) {
 
 export default function MarkdownItAttributes (md: MarkdownIt, options?: Partial<Options>) {
   const opts = { ...defaultOptions, ...options };
+
+  if (opts.leftDelimiter.length !== opts.rightDelimiter.length) {
+    throw new Error('leftDelimiter and rightDelimiter must be the same length');
+  }
+
   md.core.ruler.before('linkify', 'curly_attributes', state => {
     const tokens = state.tokens;
 
