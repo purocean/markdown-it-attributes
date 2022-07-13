@@ -13,7 +13,7 @@ const REG_ATTR_NAME = new RegExp(`^${attrName}$`);
 const REG_ATTRIBUTE = new RegExp(`^${attribute}$`);
 const REG_SPLIT_ATTRS = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g;
 
-const defaultOptions = {
+export const defaultOptions = {
   leftDelimiter: '{',
   rightDelimiter: '}',
   allowedAttributes: undefined as (string | RegExp)[] | undefined,
