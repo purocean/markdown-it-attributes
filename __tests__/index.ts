@@ -38,9 +38,6 @@ describe.each([
     expect(lib.parseInfo(opts, rd('b{}'))).toEqual(null);
     expect(lib.parseInfo(opts, rd('abc'))).toEqual(null);
     expect(lib.parseInfo(opts, rd('}fff{'))).toEqual(null);
-    expect(lib.parseInfo(opts, rd('{\\{}'))).toEqual({ pos: 0, exp: rd('{'), text: '' });
-    expect(lib.parseInfo(opts, rd('abc \\{foo}'))).toEqual(null);
-    expect(lib.parseInfo(opts, rd('{foo="\\{ab \\{ \\}c\\}"}'))).toEqual({ pos: 0, exp: rd('foo="{ab { }c}"'), text: '' });
   });
 
   test('parseAttr', () => {
@@ -89,7 +86,7 @@ describe.each([
   test('should add attributes when {} in end of last inline', () => {
     const src = rd('some text {with=attrs}');
     const expected = '<p with="attrs">some text</p>\n';
-    expect(md.render(src)).toEqual(expected);
+    expect(md.render(rd(src))).toEqual(rd(expected));
   });
 
   test('should skip between softbreak', () => {
@@ -469,6 +466,24 @@ describe.each([
     expected += '<li>123</li>\n';
     expected += '</ul>\n';
     expected += '<p class="red">abc</p>\n';
+    expect(md.render(rd(src))).toEqual(rd(expected));
+  });
+
+  test('escape start', () => {
+    const src = rd('some text \\{with=attrs}');
+    const expected = '<p>some text {with=attrs}</p>\n';
+    expect(md.render(rd(src))).toEqual(rd(expected));
+  });
+
+  test('escape end', () => {
+    const src = rd('some text {with=attrs\\}');
+    const expected = '<p>some text {with=attrs}</p>\n';
+    expect(md.render(rd(src))).toEqual(rd(expected));
+  });
+
+  test('escape middle', () => {
+    const src = rd('some text {with\\=attrs}');
+    const expected = '<p>some text {with=attrs}</p>\n';
     expect(md.render(rd(src))).toEqual(rd(expected));
   });
 
