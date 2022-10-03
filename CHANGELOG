@@ -1,3 +1,7 @@
+v1.0.0 2022-10-33
+- Support markdown-it 13.
+- Export default options
+
 v0.0.9 2022-04-24
 - Support escape.
 
