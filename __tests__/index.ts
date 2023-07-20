@@ -24,6 +24,7 @@ describe.each([
     expect(lib.parseInfo(opts, rd('abc {foo}'))).toEqual({ pos: 2, exp: 'foo', text: 'abc' });
     expect(lib.parseInfo(opts, rd('abc\n{foo}'))).toEqual({ pos: 2, exp: 'foo', text: 'abc' });
     expect(lib.parseInfo(opts, rd('ab{c{foo}'))).toEqual({ pos: 2, exp: 'foo', text: rd('ab{c') });
+    expect(lib.parseInfo(opts, rd('ab{c<;L>fo<;R>o}'))).toEqual({ pos: 2, exp: rd('c{fo}o'), text: rd('ab') });
     expect(lib.parseInfo(opts, rd('{foo}}'))).toEqual({ pos: 1, exp: 'foo', text: rd('}') });
     expect(lib.parseInfo(opts, rd('{{foo}'))).toEqual({ pos: 2, exp: 'foo', text: rd('{') });
     expect(lib.parseInfo(opts, rd('{foo}'))).toEqual({ pos: 0, exp: 'foo', text: '', });
@@ -86,6 +87,12 @@ describe.each([
   test('should add attributes when {} in end of last inline', () => {
     const src = rd('some text {with=attrs}');
     const expected = '<p with="attrs">some text</p>\n';
+    expect(md.render(rd(src))).toEqual(rd(expected));
+  });
+
+  test('test escape delimiter', () => {
+    const src = 'some text {json=\'<;L>"test": 1<;R>\'}';
+    const expected = '<p json="{&quot;test&quot;: 1}">some text</p>\n';
     expect(md.render(rd(src))).toEqual(rd(expected));
   });
 

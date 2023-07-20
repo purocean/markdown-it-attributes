@@ -93,6 +93,11 @@ export function getAttrs (exp: string) {
   return list.map(parseAttr).filter(Boolean) as Attr[];
 }
 
+function escapeDelimiter (opts: Options, exp: string) {
+  return exp.replace(/<;L>/g, opts.leftDelimiter)
+    .replace(/<;R>/g, opts.rightDelimiter);
+}
+
 export function parseInfo (opts: Options, content?: string | null): Info | null {
   if (!content) {
     return null;
@@ -116,7 +121,7 @@ export function parseInfo (opts: Options, content?: string | null): Info | null 
       return null;
     }
 
-    return { pos: posStart ? InfoPos.WHOLE : InfoPos.RIGHT, exp, text };
+    return { pos: posStart ? InfoPos.WHOLE : InfoPos.RIGHT, exp: escapeDelimiter(opts, exp), text };
   } else if (posStart && endIdx > -1) {
     const exp = content.substring(opts.leftDelimiter.length, endIdx);
     const text = content.substring(endIdx + opts.rightDelimiter.length); // .trimStart();
@@ -124,7 +129,7 @@ export function parseInfo (opts: Options, content?: string | null): Info | null 
       return null;
     }
 
-    return { pos: posEnd ? InfoPos.WHOLE : InfoPos.LEFT, exp, text };
+    return { pos: posEnd ? InfoPos.WHOLE : InfoPos.LEFT, exp: escapeDelimiter(opts, exp), text };
   }
 
   return null;
